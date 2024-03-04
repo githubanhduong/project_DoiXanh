@@ -6,7 +6,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -36,15 +35,16 @@ public class UserService {
 	@Autowired
 	UserRepository userRepository;
 
-	public void exportExcel(HttpServletResponse response) throws IOException {
+	public void exportExcel(List<User> listUser, HttpServletResponse response) throws IOException {
 		XSSFWorkbook workbook = new XSSFWorkbook();
 
 		// Create a new sheet
 		XSSFSheet sheet = workbook.createSheet("Data Sheet");
 
 		// Create sample data
-		String[] headers = { "Name", "Age", "City" };
-		int[] data = { 1, 25, 30 };
+		String[] headers = { "ID", "Group ID", "First Name", "Last Name", "Email", "Phone", "Created Date",
+				"Updated Date" };
+//		String[] data = { "183", "3", "Winston", "Schaden", "ebert.zora@hotmail.com", "1-699-329-3148x7873", "2006-01-01 17:57:10", "1991-12-30 19:58:15" };
 
 		// Add header row
 		XSSFRow headerRow = sheet.createRow(0);
@@ -54,25 +54,40 @@ public class UserService {
 		}
 
 		// Add data row
-		XSSFRow dataRow = sheet.createRow(1);
-		for (int i = 0; i < data.length; i++) {
-			XSSFCell cell = dataRow.createCell(i);
-			if (i == 1) { // Set data type for age column as integer
-				cell.setCellValue(data[i]);
-			} else {
-				cell.setCellValue(String.valueOf(data[i])); // Convert data to string for other columns
-			}
+		int n = 1;
+		for (User user : listUser) {
+			if (user.getGroupId() != 3) continue;
+			XSSFRow dataRow = sheet.createRow(n);
+			dataRow.createCell(0).setCellValue(String.valueOf(user.getId())); // Convert data to string for other
+			dataRow.createCell(1).setCellValue(String.valueOf(user.getGroupId())); // Convert data to string for other
+			dataRow.createCell(2).setCellValue(String.valueOf(user.getFirstName())); // Convert data to string for other
+			dataRow.createCell(3).setCellValue(String.valueOf(user.getLastName())); // Convert data to string for other
+			dataRow.createCell(4).setCellValue(String.valueOf(user.getEmail())); // Convert data to string for other
+			dataRow.createCell(5).setCellValue(String.valueOf(user.getPhone())); // Convert data to string for other
+			dataRow.createCell(6).setCellValue(String.valueOf(user.getCreatedAt())); // Convert data to string for other
+			dataRow.createCell(7).setCellValue(String.valueOf(user.getUpdatedAt())); // Convert data to string for other
+			n++;
 		}
 
-		// Set response content type
-		response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+	
 
-		// Set suggested filename
-		response.setHeader("Content-Disposition", "attachment; filename=dataUser.xlsx");
+//		for (int i = 0; i < data.length; i++) {
+//			XSSFCell cell = dataRow.createCell(i);
+//			if (i == 1) { // Set data type for age column as integer
+//				cell.setCellValue(data[i]);
+//			} else {
+//				cell.setCellValue(String.valueOf(data[i])); // Convert data to string for other columns
+//			}
+//		}
 
-		// Write workbook to response stream
-		workbook.write(response.getOutputStream());
-		workbook.close();
+	// Set response content type
+	response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+	// Set suggested filename
+	response.setHeader("Content-Disposition","attachment; filename=dataUser.xlsx");
+
+	// Write workbook to response stream
+	workbook.write(response.getOutputStream());workbook.close();
 
 	}
 
@@ -150,7 +165,6 @@ public class UserService {
 
 		List<User> listUsersRemove = new ArrayList<>();
 		for (var user : listUserExcels) {
-			log.info(user.getEmail() + "  || " + user.getFirstName() + "  || " + user.getLastName() + "  || " + user.getPhone() + "  || " + user.getCreatedAt() + "  || " + user.getUpdatedAt());
 			if (listUsers.contains(user)) {
 				user.setError(false);
 			} else if (user.getGroupId() == 3) {

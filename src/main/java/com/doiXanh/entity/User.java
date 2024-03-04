@@ -82,7 +82,8 @@ public class User {
 		if (o == null || getClass() != o.getClass())
 			return false;
 		User other = (User) o;
-		return Objects.equals(firstName, other.firstName) && Objects.equals(lastName, other.lastName)
+		return id == other.id &&
+				Objects.equals(firstName, other.firstName) && Objects.equals(lastName, other.lastName)
 				&& Objects.equals(email, other.email) && Objects.equals(phone, other.phone)
 				&& Objects.equals(createdAt, other.createdAt) && Objects.equals(updatedAt, other.updatedAt);
 	}

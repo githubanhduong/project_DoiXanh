@@ -2,7 +2,6 @@ package com.doiXanh.controller;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -46,9 +46,9 @@ public class UserController {
 	@Autowired
 	EntityManager entityManager;
 
-	@GetMapping("/export")
-	public void exportExcel(HttpServletResponse response) throws IOException {
-		userService.exportExcel(response);
+	@PostMapping("/export")
+	public void exportExcel(@RequestBody List<User> user, HttpServletResponse response) throws IOException {
+		userService.exportExcel(user, response);
 	}
 
 	@PostMapping("/upload")
@@ -78,10 +78,6 @@ public class UserController {
         	Integer userId = entry.getKey();
         	Integer groupId = entry.getValue();
             
-            // Tìm người dùng theo ID
-//            User user = userRepository.findById(userId).orElse(null);
-//            if (user != null) {
-//			userRepository.save(
         	entityManager.persist(
 					User.builder().withId(userId)
 									.withGroupUser(GroupUser.builder().withId(groupId).build())
@@ -104,23 +100,19 @@ public class UserController {
 	}
 	
 	@Transactional
-	@GetMapping("/test")
+	@PutMapping("/test")
 	@ResponseBody
 	public ResponseEntity<String> testApi(@RequestBody String json) throws IOException, ParseException {
 		
 		 ObjectMapper objectMapper = new ObjectMapper();
-		    // Corrected the JSON parsing to handle keys as strings due to the input format
 		    Map<String, Integer> userGroupMap = objectMapper.readValue(json, new TypeReference<Map<String, Integer>>() {});
 
-		    // Group users by their groupId
 		    Map<Integer, List<Integer>> groupedUsers = userGroupMap.entrySet().stream()
 		            .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.mapping(entry -> Integer.parseInt(entry.getKey()), Collectors.toList())));
 
-		    // Iterate over the grouped users and update their userGroup.id accordingly
 		    for (Map.Entry<Integer, List<Integer>> entry : groupedUsers.entrySet()) {
 		        Integer groupId = entry.getKey();
 		        List<Integer> userIds = entry.getValue();
-		        // Assuming userRepository.updateUsersGroup accepts a List<Integer> for userIds and a GroupUser object for the new group
 		        userRepository.updateUsersGroup(userIds, GroupUser.builder().withId(groupId).build());
 		    }
 		
