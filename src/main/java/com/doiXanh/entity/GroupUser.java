@@ -35,7 +35,7 @@ public class GroupUser {
     private boolean active;
     
 //    @OneToMany(mappedBy = "groupUser")
-//    @JsonBackReference        				1
+//    @JsonBackReference        				1   only use mappedBy = "groupUser" when entity User use @ManyToOne
 //    private List<User> listUsers;
 
 //    @OneToMany(fetch = FetchType.LAZY)
